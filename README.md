@@ -1,1 +1,1 @@
-# TinyMolecule
+# tinymolecule
