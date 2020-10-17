@@ -3,4 +3,10 @@ numpy
 pandas
 pyyaml
 scipy
+torch
+networkx
+pysmiles
+rdkit
+molsets
+chembl_webresource_client
 
