@@ -178,7 +178,7 @@ class LinearDecoder(LinearModel):
         x = latent_x
         for i in range(self.num_hid + 1):  # excluding output layer
             x = F.relu(self.dropout[i](self.layers[i](x)))
-        recon_x = self.layers[-1](x)
+        recon_x = torch.sigmoid(self.layers[-1](x))
 
         return recon_x
 
