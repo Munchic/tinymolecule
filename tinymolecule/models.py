@@ -6,18 +6,24 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-class LinearVAE(nn.Module):
+class TinyVAE(nn.Module):
     def __init__(self, encoder: nn.Module = None, decoder: nn.Module = None):
         super().__init__()
 
         self.encoder = encoder
         self.decoder = decoder
 
+    def encode(self, x):
+        return self.encoder.forward(x)
+
+    def decode(self, latent_x):
+        return self.decoder.forward(latent_x)
+
     def forward(self, x):
-        latent_x = self.encoder.forward(x)  # encoding
+        latent_x, mu, logvar = self.encoder.forward(x)  # encoding
         recon_x = self.decoder.forward(latent_x)  # decoding
 
-        return recon_x
+        return recon_x, mu, logvar
 
 
 class LinearModel(nn.Module):
@@ -131,7 +137,7 @@ class LinearEncoder(LinearModel):
         log_var = x[:, 1, :]  # the other feature values as variance
         latent_x = self.reparam(mu, log_var)
 
-        return latent_x
+        return latent_x, mu, log_var
 
 
 class LinearDecoder(LinearModel):
@@ -172,12 +178,12 @@ class LinearDecoder(LinearModel):
         x = latent_x
         for i in range(self.num_hid + 1):  # excluding output layer
             x = F.relu(self.dropout[i](self.layers[i](x)))
-        recon_x = torch.sigmoid(x)
+        recon_x = self.layers[-1](x)
 
         return recon_x
 
 
-class ConvolutionalVAE(LinearVAE):
+class ConvolutionalVAE(nn.Module):
     def __init__(
         self,
         input_size=308,
