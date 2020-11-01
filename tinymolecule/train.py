@@ -38,10 +38,9 @@ def simple_train(
             optimizer.zero_grad()
 
             with torch.set_grad_enabled(True):
-                molec_recon, mu, logvar = model(molec)
-
-                ce_loss = criterion(F.normalize(molec_recon), F.normalize(molec))
-                loss = vae_loss(ce_loss, mu, logvar)
+                molec_recon, mu, log_var = model(molec)
+                recon_loss = criterion(molec_recon, molec / 27)
+                loss = vae_loss(recon_loss, mu, log_var)
                 running_loss += loss.item()
 
                 loss.backward()
@@ -51,10 +50,10 @@ def simple_train(
         print("epoch_loss:", train_loss)
 
 
-def vae_loss(ce_loss, mu, logvar):
+def vae_loss(recon_loss, mu, log_var):
     # full reconstruction loss
-    ce = ce_loss
-    kd = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+    ce = recon_loss
+    kd = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
     return ce + kd
 
 

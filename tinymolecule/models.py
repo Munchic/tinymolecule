@@ -20,10 +20,10 @@ class TinyVAE(nn.Module):
         return self.decoder.forward(latent_x)
 
     def forward(self, x):
-        latent_x, mu, logvar = self.encoder.forward(x)  # encoding
+        latent_x, mu, log_var = self.encoder.forward(x)  # encoding
         recon_x = self.decoder.forward(latent_x)  # decoding
 
-        return recon_x, mu, logvar
+        return recon_x, mu, log_var
 
 
 class LinearModel(nn.Module):
