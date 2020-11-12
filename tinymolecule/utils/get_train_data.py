@@ -7,7 +7,8 @@ import torch
 import pandas as pd
 import moses
 
-# TO-DO add proper file path management
+# TODO filter out known CCR5 inhibitors
+# TODO add proper file path management
 
 # load in download ccr5 data
 data_dir = "/Users/Munchic/Developer/Capstone/tinymolecule/data/ccr5_ic50_meta.csv"
