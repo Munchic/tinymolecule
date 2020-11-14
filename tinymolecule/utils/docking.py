@@ -52,7 +52,7 @@ def create_empty_entry():
 
 def dock(ligand_folder_path, config_path, pdb_out_path, subsample_perc=0.01):
     # prepare paths
-    out_path = pdb_out_path / "valid_sample_1e5"
+    out_path = pdb_out_path / "valid_sample_1e5_ccr2"  # "valid_sample_1e5"
     logs_path = out_path / "logs"
     os.makedirs(out_path, exist_ok=True)
     os.makedirs(logs_path, exist_ok=True)
@@ -110,13 +110,12 @@ def generate_logs_table(logs_path):
         entry = log.flatten(order="F")
 
         logs_table = np.vstack((logs_table, entry))
-        logs_df = pd.DataFrame(logs_table[1:], columns=logs_table[0])
-
-    print(logs_df.head())
+        logs_df = pd.DataFrame(logs_table[1:], columns=logs_table[0], dtype=float)
 
     return logs_df
 
 
+# CCR5 docking on generated
 # dock(
 #     ligand_folder_path=Path(
 #         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/valid_sample_1e5"
@@ -127,8 +126,43 @@ def generate_logs_table(logs_path):
 #     pdb_out_path=Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out"),
 # )
 
-generate_logs_table(
-    Path(
-        "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5/logs"
-    )
-)
+# generate_logs_table(
+#     Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5/logs"
+#     )
+# )
+
+
+# CCR5 docking on train
+# dock(
+#     ligand_folder_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/train"
+#     ),
+#     config_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr5.txt"
+#     ),
+#     pdb_out_path=Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out"),
+# )
+
+# generate_logs_table(
+#     Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5/logs"
+#     )
+# )
+
+# CCR2 docking on generated
+# dock(
+#     ligand_folder_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/valid_sample_1e5"
+#     ),
+#     config_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr2.txt"
+#     ),
+#     pdb_out_path=Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out"),
+# )
+
+# generate_logs_table(
+#     Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5_ccr2/logs"
+#     )
+# )

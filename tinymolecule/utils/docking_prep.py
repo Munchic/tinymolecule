@@ -34,20 +34,26 @@ def filter_valid(
     gen_valid["base64_id"] = gen_valid["SMILES"].apply(hash_smiles)
 
     save_dir = (
-        GEN_DIR / "valid_sample_1e5.csv"
-    )  # TO-DO: automate to corresponding file name
+        GEN_DIR / "ccr5_ic50_train.csv"  # "valid_sample_1e5.csv"
+    )  # TODO: automate to corresponding file name
     gen_valid.to_csv(save_dir)
 
 
-def get_pdbqt(molec_path=GEN_DIR / "valid_sample_1e5.csv", save_dir=PDBQT_DIR):
+def get_pdbqt(
+    molec_path=GEN_DIR / "ccr5_ic50_train.csv", save_dir=PDBQT_DIR
+):  # "valid_sample_1e5"
     valid_samples = pd.read_csv(molec_path)
-    os.makedirs(save_dir / "valid_sample_1e5", exist_ok=True)
+    os.makedirs(save_dir / "train", exist_ok=True)  # "valid_sample_1e5"
 
     for i in valid_samples.index:
+        print(
+            f"converting molecule {valid_samples['base64_id'][i]} ({i}/{len(valid_samples)})"
+        )
+
         # write temporary SMILES
         molec = valid_samples["SMILES"][i]
         base64_id = valid_samples["base64_id"][i]
-        temp_file = save_dir / "valid_sample_1e5" / f"temp_{base64_id}.smi"
+        temp_file = save_dir / "train" / f"temp_{base64_id}.smi"  # "valid_sample_1e5"
         with open(temp_file, "w") as temp:
             temp.write(molec)
 
@@ -58,11 +64,13 @@ def get_pdbqt(molec_path=GEN_DIR / "valid_sample_1e5.csv", save_dir=PDBQT_DIR):
         conv.AddOption("h", conv.GENOPTIONS)
 
         # convert temporary SMILES to PDBQT format
-        pdbqt_file = save_dir / "valid_sample_1e5" / f"{base64_id}.pdbqt"
+        pdbqt_file = save_dir / "train" / f"{base64_id}.pdbqt"  # "valid_sample_1e5"
         conv.OpenInAndOutFiles(str(temp_file), str(pdbqt_file))
         conv.Convert()
         os.remove(temp_file)
 
 
-filter_valid()
-get_pdbqt()
+# filter_valid(
+#     gen_path="/Users/Munchic/Developer/Capstone/tinymolecule/data/ccr5_ic50_train.csv"
+# )
+get_pdbqt(molec_path=GEN_DIR / "ccr5_ic50_train.csv")
