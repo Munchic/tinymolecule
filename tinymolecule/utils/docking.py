@@ -9,6 +9,9 @@ import numpy as np
 import pandas as pd
 
 
+LOGS_SUMMARY_FILE = "summary.csv"
+
+
 def change_file_ext(filename, ext=None):
     ext_pos = filename.find(".")
     new_filename = filename[:ext_pos]
@@ -50,19 +53,47 @@ def create_empty_entry():
     return filler
 
 
-def dock(ligand_folder_path, config_path, pdb_out_path, subsample_perc=0.01):
+def intersection(lst1, lst2):
+    lst3 = [value for value in lst1 if value in lst2]
+    return lst3
+
+
+def dock(
+    ligand_folder_path,
+    config_path,
+    pdb_out_path,
+    subsample_perc=0.01,
+    molecs_from_logs=None,
+):
+    """
+    Parameters
+    ----------
+        molecs_from_logs: Path or None
+            Specifies path to a log file from which to take corresponding molecules for docking
+
+    """
+
     # prepare paths
-    out_path = pdb_out_path / "valid_sample_1e5_ccr2"  # "valid_sample_1e5"
+    out_path = pdb_out_path / "valid_sample_1e5_ccr2"  # "train"  # "valid_sample_1e5"
     logs_path = out_path / "logs"
     os.makedirs(out_path, exist_ok=True)
     os.makedirs(logs_path, exist_ok=True)
 
     # random subsampling
     all_ligand_files = os.listdir(ligand_folder_path)
-    if subsample_perc != False or subsample_perc < 1:
+    if os.path.isfile(
+        str(molecs_from_logs)
+    ):  # if choose molecules from logs of another docking experiment
+        ligs_to_dock = pd.read_csv(molecs_from_logs)["base64_id"].values
+        ligand_files = []
+        for lig in all_ligand_files:
+            if change_file_ext(lig) in ligs_to_dock:
+                ligand_files.append(lig)
+    elif subsample_perc != False or subsample_perc < 1:
         subsample_count = int(subsample_perc * len(all_ligand_files))
         print(f"subsampling {subsample_count} molecules to dock")
         ligand_files = sample(all_ligand_files, subsample_count)
+
     else:
         ligand_files = all_ligand_files
 
@@ -86,8 +117,12 @@ def dock(ligand_folder_path, config_path, pdb_out_path, subsample_perc=0.01):
 def generate_logs_table(logs_path):
     all_logs = os.listdir(logs_path)
     logs_table = get_vina_header()  # get header of log entries
+    log_ids = []
 
     for logfile in all_logs:
+        if logfile == LOGS_SUMMARY_FILE:  # ignore summary file that we will create
+            continue
+
         with open(logs_path / logfile) as _log:
             lines = _log.readlines()
 
@@ -110,7 +145,11 @@ def generate_logs_table(logs_path):
         entry = log.flatten(order="F")
 
         logs_table = np.vstack((logs_table, entry))
-        logs_df = pd.DataFrame(logs_table[1:], columns=logs_table[0], dtype=float)
+        log_ids.append(change_file_ext(logfile))
+
+    logs_df = pd.DataFrame(logs_table[1:], columns=logs_table[0], dtype=float)
+    logs_df["base64_id"] = log_ids
+    logs_df.to_csv(logs_path / LOGS_SUMMARY_FILE)  # save
 
     return logs_df
 
@@ -132,37 +171,38 @@ def generate_logs_table(logs_path):
 #     )
 # )
 
-
 # CCR5 docking on train
 # dock(
 #     ligand_folder_path=Path(
 #         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/train"
 #     ),
 #     config_path=Path(
-#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr5.txt"
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config.txt"
 #     ),
 #     pdb_out_path=Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out"),
+#     subsample_perc=0.05,
 # )
 
 # generate_logs_table(
-#     Path(
-#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5/logs"
-#     )
+#     Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/train/logs")
 # )
 
 # CCR2 docking on generated
-# dock(
-#     ligand_folder_path=Path(
-#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/valid_sample_1e5"
-#     ),
-#     config_path=Path(
-#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr2.txt"
-#     ),
-#     pdb_out_path=Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out"),
-# )
+dock(
+    ligand_folder_path=Path(
+        "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/valid_sample_1e5"
+    ),
+    config_path=Path(
+        "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr2.txt"
+    ),
+    pdb_out_path=Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out"),
+    molecs_from_logs=Path(
+        "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5/logs/summary.csv"
+    ),
+)
 
-# generate_logs_table(
-#     Path(
-#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5_ccr2/logs"
-#     )
-# )
+generate_logs_table(
+    Path(
+        "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5_ccr2/logs"
+    )
+)
