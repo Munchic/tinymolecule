@@ -187,22 +187,22 @@ def generate_logs_table(logs_path):
 #     Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/train/logs")
 # )
 
-# CCR2 docking on generated
-dock(
-    ligand_folder_path=Path(
-        "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/valid_sample_1e5"
-    ),
-    config_path=Path(
-        "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr2.txt"
-    ),
-    pdb_out_path=Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out"),
-    molecs_from_logs=Path(
-        "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5/logs/summary.csv"
-    ),
-)
+# # CCR2 docking on generated
+# dock(
+#     ligand_folder_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/valid_sample_1e5"
+#     ),
+#     config_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr2.txt"
+#     ),
+#     pdb_out_path=Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out"),
+#     molecs_from_logs=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5/logs/summary.csv"
+#     ),
+# )
 
-generate_logs_table(
-    Path(
-        "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5_ccr2/logs"
-    )
-)
+# generate_logs_table(
+#     Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5_ccr2/logs"
+#     )
+# )
