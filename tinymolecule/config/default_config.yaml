@@ -1,0 +1,43 @@
+---
+# PROTEIN TARGETS
+#
+targets:
+  off_targets:
+    CCR2:
+      pdbqt: "ccr2.pdbqt"
+      vina_config: "vina_config_ccr2.txt"
+    CCR1:
+      pdbqt: "ccr2.pdbqt"
+      vina_config: "vina_config_ccr1.txt"
+    CCR3:
+      pdbqt: "ccr2.pdbqt"
+      vina_config: "vina_config_ccr3.txt"
+    CCR9:
+      pdbqt: "ccr2.pdbqt"
+      vina_config: "vina_config_ccr9.txt"
+    CCR6:
+      pdbqt: "ccr2.pdbqt"
+      vina_config: "vina_config_ccr6.txt"
+
+  variants:
+    WT_CCR5:
+      pdbqt: "ccr5.pdbqt"
+      vina_config: "vina_config_ccr5.txt"
+    CCR5_Y3D:
+      pdbqt: "ccr5_y3d.pdbqt"
+      vina_config: "vina_config_ccr5_y3d.txt"
+    CCR5_G301E:
+      pdbqt: "ccr5_g301e.pdbqt"
+      vina_config: "vina_config_ccr5_g301e.txt"
+    CCR5_G202E:
+      pdbqt: "ccr5_g202e.pdbqt"
+      vina_config: "vina_config_ccr5_g202e.txt"
+    CCR5_I253F:
+      pdbqt: "ccr5_i253f.pdbqt"
+      vina_config: "vina_config_ccr5_i253f.txt"
+
+
+# OPERATING PATHS
+tinymolecule_paths:
+  ligands_train_dir: "ccr5_train"
+  ligands_gen_dir: "ccr5_gen"
