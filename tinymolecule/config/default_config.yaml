@@ -37,7 +37,21 @@ targets:
       vina_config: "vina_config_ccr5_i253f.txt"
 
 
-# OPERATING PATHS
-tinymolecule_paths:
-  ligands_train_dir: "ccr5_train"
-  ligands_gen_dir: "ccr5_gen"
+# DATA STORAGE PATHS
+#
+data_paths:
+  data_dir: "data"
+  ligands_dir: "ligands"  # */data/ligands/, for storing input small molecules
+  targets_dir: "targets"  # */data/targets/, for storing PDBQT structures of protein targets
+  out_dir: "out"  # */data/out/, for storing docked coordinates of small molecules
+
+  ligands_train_csv: "ccr5_train.csv"  # */data/ligands/train.csv
+  ligands_gen_csv: "ccr5_gen.csv"  # */data/ligands/gen.csv
+  ligands_train_dir: "ccr5_train"  # */data/ligands/train/
+  ligands_gen_dir: "ccr5_gen"  # */data/ligands/gen/
+
+  targets_pdbqt_dir: "pdbqt"  # */data/targets/pdbqt/
+  targets_vina_config_dir: "vina_config"  # */data/targets/vina_config/
+
+  out_pdbqt_dir: "pdbqt"  # */data/out/<TARGET_NAME>/pdbqt/
+  out_logs_dir: "logs"  # */data/out/<TARGET_NAME>/logs/
