@@ -45,13 +45,22 @@ data_paths:
   targets_dir: "targets"  # */data/targets/, for storing PDBQT structures of protein targets
   out_dir: "out"  # */data/out/, for storing docked coordinates of small molecules
 
-  ligands_train_csv: "ccr5_train.csv"  # */data/ligands/train.csv
-  ligands_gen_csv: "ccr5_gen.csv"  # */data/ligands/gen.csv
-  ligands_train_dir: "ccr5_train"  # */data/ligands/train/
-  ligands_gen_dir: "ccr5_gen"  # */data/ligands/gen/
+  ligands_train_csv: "train.csv"  # */data/ligands/train.csv
+  ligands_gen_csv: "gen.csv"  # */data/ligands/gen.csv
+  ligands_train_dir: "train"  # */data/ligands/train/
+  ligands_gen_dir: "gen"  # */data/ligands/gen/
 
   targets_pdbqt_dir: "pdbqt"  # */data/targets/pdbqt/
   targets_vina_config_dir: "vina_config"  # */data/targets/vina_config/
 
-  out_pdbqt_dir: "pdbqt"  # */data/out/<TARGET_NAME>/pdbqt/
-  out_logs_dir: "logs"  # */data/out/<TARGET_NAME>/logs/
+  out_train_dir: "train"
+  out_gen_dir: "train"
+  out_pdbqt_dir: "pdbqt"  # */data/out/<train or gen>/<TARGET_NAME>/pdbqt/
+  out_logs_dir: "logs"  # */data/out/<train or gen>/<TARGET_NAME>/logs/
+
+
+# TINYMOLECULE PARAMETERS
+#
+tiny_params:
+  uuid_crop: 8  # number of characters to crop UUID at
+  uuid_seed: 42  # seed for reproducible hashes
