@@ -3,17 +3,20 @@ import csv
 
 from chembl_webresource_client.new_client import new_client
 
-DATA_DIR = Path("/Users/Munchic/Developer/Capstone/tinymolecule/data")
+
+DATA_DIR = Path(__file__).parent.parent / "data"
 
 
-def get_target_metadata(target_chembl_id="CHEMBL274", dir=DATA_DIR):
+def download_chembl_assays_metadata(
+    target_chembl_id="CHEMBL274", save_dir=DATA_DIR, filename="ccr5_assays.csv"
+):
     activity = new_client.activity
     target_activities = activity.filter(target_chembl_id=target_chembl_id).filter(
         standard_type="IC50"
     )
 
     columns = target_activities[0].keys()
-    csv_file = DATA_DIR / "ccr5_ic50_meta.csv"
+    csv_file = save_dir / filename
     try:
         with open(csv_file, "w") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=columns)
@@ -22,6 +25,3 @@ def get_target_metadata(target_chembl_id="CHEMBL274", dir=DATA_DIR):
                 writer.writerow(data)
     except IOError as e:
         print(e)
-
-
-get_target_metadata()
