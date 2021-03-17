@@ -1,4 +1,5 @@
 import os
+from subprocess import CalledProcessError
 from copy import deepcopy
 from pathlib import Path
 from typing import Optional, Union, List, Tuple
@@ -6,10 +7,10 @@ from random import sample
 
 import yaml
 import numpy as np
-import pandas as pdf
+import pandas as pd
 
 from openbabel import openbabel
-from tinymolecule.utils.helper_fn import change_file_ext, hash_smiles
+from tinymolecule.utils.helper_fn import change_file_ext, hash_smiles, shell_command
 from tinymolecule.utils.molecules import molecule_is_valid
 
 
@@ -21,6 +22,7 @@ class TinyDock:
     """
 
     _DEFAULT_CONFIG = Path(__file__).parent / "config" / "default_config.yaml"
+    _ROOT_DIR = Path(__file__).parent.parent
 
     def __init__(self, config=None):
         with open(self._DEFAULT_CONFIG) as config_file:
@@ -28,8 +30,12 @@ class TinyDock:
                 yaml.load(config_file, Loader=yaml.Loader) if not config else config
             )
         self.paths = self.config["data_paths"]
-        self.data_path = Path(self.config["data_paths"]["data"])
+        self.data_path = self._ROOT_DIR / self.paths["data_dir"]
         self.targets = self.config["targets"]
+
+        _temp_targets = deepcopy(self.targets["off_targets"])
+        _temp_targets.update(self.targets["variants"])
+        self.all_targets = _temp_targets
 
         self.ligands_train_dir = (
             self.data_path / self.paths["ligands_dir"] / self.paths["ligands_train_dir"]
@@ -38,10 +44,16 @@ class TinyDock:
             self.data_path / self.paths["ligands_dir"] / self.paths["ligands_gen_dir"]
         )
         self.which_ligands = "gen"
+        self.ligands_dir = self.data_path / self.paths["ligands_dir"]
+        self.ligands_subdir = (
+            self.ligands_dir / self.paths[f"ligands_{self.which_ligands}_dir"]
+        )
 
         self.tiny_params = self.config["tiny_params"]
 
-    def prepare_molecules(self, smiles_csv_path: Union[string, Path] = None):
+    def prepare_molecules(
+        self, which_ligands: str = "gen", smiles_csv_path: Union[str, Path] = None
+    ):
         """
         Creates pdbqt ready-to-dock molecules from .csv of SMILES strings.
 
@@ -59,43 +71,44 @@ class TinyDock:
             self.which_ligands = which_ligands
 
         if smiles_csv_path == None:
-            self.ligands_dir = self.data_path / self.paths["ligands_dir"]
             self.ligands_csv = (
-                self.data_path / self.paths["ligands_dir"] / self.paths[f"ligands_{self.which_ligands}_csv"]
+                self.data_path
+                / self.paths["ligands_dir"]
+                / self.paths[f"ligands_{self.which_ligands}_csv"]
             )
-            self.ligands_subdir = self.ligands_dir / self.paths[f"ligands_{self.which_ligands}_dir"
-            os.makedirs(self.ligands_subdir, exists_ok=True)
+            self.ligands_subdir = (
+                self.ligands_dir / self.paths[f"ligands_{self.which_ligands}_dir"]
+            )
+            os.makedirs(self.ligands_subdir, exist_ok=True)
         else:
             self.ligands_csv = Path(smiles_csv_path)
 
         self._assign_uuid()
-        self._get_pdbqt()
+        self._get_pdbqt()  # TODO: add check for which ones have been converted
 
     def _assign_uuid(self):
         """
         Appends a column of UUIDs to .csv of SMILES if the column isn't already there
         """
 
-        ligands = pd.read_csv(ligands_csv)
+        ligands = pd.read_csv(self.ligands_csv)
         if "uuid" not in ligands:  # if UUIDs are not assigned yet
             ligands["uuid"] = ligands["SMILES"].apply(hash_smiles)
 
-        ligands.to_csv(ligands_csv)
+        ligands.to_csv(self.ligands_csv)
 
     def _get_pdbqt(self):
         """
         Generates PDBQT files from SMILES strings using open babel.
         """
 
-        _ligands = pd.read_csv(ligands_csv)
+        _ligands = pd.read_csv(self.ligands_csv)
         valid = [molecule_is_valid(molec) for molec in _ligands["SMILES"]]
         ligands = _ligands[valid].reset_index(drop=True)
         os.makedirs(self.ligands_subdir, exist_ok=True)
 
         for i in ligands.index:
-            print(
-                f"converting molecule {ligands['uuid'][i]} ({i + 1}/{len(ligands)})"
-            )
+            print(f"converting molecule {ligands['uuid'][i]} ({i + 1}/{len(ligands)})")
 
             # write temporary SMILES
             molec = ligands["SMILES"][i]
@@ -115,9 +128,15 @@ class TinyDock:
             conv.OpenInAndOutFiles(str(temp_file), str(pdbqt_file))
             conv.Convert()
             os.remove(temp_file)
-        
 
-    def dock(self, targets=None, subsample=1, dock_from_logs=None, rewrite=False):
+    def dock(
+        self,
+        targets=None,
+        subsample=1,
+        dock_from_logs=None,
+        rewrite=False,
+        silent_error=False,
+    ):
         """
         Performs docking for the prepared molecules on specified targets.
 
@@ -143,21 +162,26 @@ class TinyDock:
         else:
             targets_to_dock = targets
 
+        self.out_subdir = (
+            self.data_path
+            / self.paths["out_dir"]
+            / self.paths[f"out_{self.which_ligands}_dir"]
+        )
+
+        # TODO: parallelize the docking process
         for trgt in targets_to_dock:
             trgt_name = trgt.lower()
-            cur_out_dir = Path(
-                self.data_path
-                / self.paths["out_dir"]
-                / self.paths[f"out_{self.which_ligands}_dir"]
-                / trgt_name
-            )
-            out_pdbqt_dir = cur_out_dir / self.paths["out_pdbqt_dir"]
-            out_logs_dir = cur_out_dir / self.paths["out_logs_dir"]
-            os.makedirs(out_path, exist_ok=out_pdbqt_dir)
-            os.makedirs(logs_path, exist_ok=out_logs_dir)
+            out_pdbqt_dir = self.out_subdir / trgt_name / self.paths["out_pdbqt_dir"]
+            out_logs_dir = self.out_subdir / trgt_name / self.paths["out_logs_dir"]
+            os.makedirs(out_pdbqt_dir, exist_ok=True)
+            os.makedirs(out_logs_dir, exist_ok=True)
 
             ligands_to_dock = list(  # filter out already docked molecules
                 set(os.listdir(self.ligands_gen_dir)) - set(os.listdir(out_pdbqt_dir))
+            )
+
+            print(
+                f">>> DOCKING {len(ligands_to_dock)} MOLECULES ON {trgt.upper()} <<< "
             )
 
             if os.path.isfile(
@@ -178,18 +202,36 @@ class TinyDock:
                 ligand_files = ligands_to_dock
 
             # dock every molecule
+            config_path = (
+                self.data_path
+                / self.paths["targets_dir"]
+                / self.paths["targets_vina_config_dir"]
+                / self.all_targets[trgt]["vina_config"]
+            )
+            receptor_path = (
+                self.data_path
+                / self.paths["targets_dir"]
+                / self.paths["targets_pdbqt_dir"]
+                / self.all_targets[trgt]["pdbqt"]
+            )
+
             for i, ligand in enumerate(ligand_files):
-                print(f"docking molecule {i + 1} out of {len(ligand_files)}")
+                print(
+                    f"docking molecule {change_file_ext(ligand)} ({i + 1}/{len(ligand_files)})",
+                    end="",
+                )
                 try:
                     shell_command(
                         f"vina --config {config_path} "
-                        # + f"--receptor {receptor_path} "
-                        + f"--ligand {ligand_folder_path / ligand} "
-                        + f"--out {out_path / ligand} "
-                        + f"--log {logs_path / change_file_ext(ligand, ext='txt')}"
+                        + f"--receptor {receptor_path} "
+                        + f"--ligand {self.ligands_subdir / ligand} "
+                        + f"--out {out_pdbqt_dir / ligand} "
+                        + f"--log {out_logs_dir / change_file_ext(ligand, ext='txt')}"
                     )
-                except subprocess.CalledProcessError as e:
-                    print(f"subprocess error at molecule {ligand}, skipping...")
+                    print(" ✅ success")
+                except CalledProcessError as e:
+                    if not silent_error:
+                        print(" ❌ subprocess error")
 
     def generate_logs_table(self, targets):
         pass

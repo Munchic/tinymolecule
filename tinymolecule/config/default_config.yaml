@@ -54,7 +54,7 @@ data_paths:
   targets_vina_config_dir: "vina_config"  # */data/targets/vina_config/
 
   out_train_dir: "train"
-  out_gen_dir: "train"
+  out_gen_dir: "gen"
   out_pdbqt_dir: "pdbqt"  # */data/out/<train or gen>/<TARGET_NAME>/pdbqt/
   out_logs_dir: "logs"  # */data/out/<train or gen>/<TARGET_NAME>/logs/
 

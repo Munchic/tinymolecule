@@ -17,5 +17,5 @@ class TinyTrain:
     def __init__(self, config=None):
         self.config = yaml.load(self._DEFAULT_CONFIG) if not config else config
 
-    def get_train_data(self, smiles_csv: Union[string, Path]):
+    def get_train_data(self, smiles_csv: Union[str, Path]):
         pass
