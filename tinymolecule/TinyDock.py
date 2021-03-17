@@ -17,8 +17,8 @@ from tinymolecule.utils.molecules import molecule_is_valid
 class TinyDock:
     """
     Core class of the tinymolecule pipeline to dock generated molecules.
-    Stores docked molecules objects and their metrics. Implements analyses
-    showcased in the paper.
+    Stores docked molecules objects and their metrics. Implements automated
+    docking and logging based on specified config.
     """
 
     _DEFAULT_CONFIG = Path(__file__).parent / "config" / "default_config.yaml"

@@ -18,9 +18,8 @@ def change_file_ext(filename, ext=None):
 def hash_smiles(smiles, hash_crop=8, hash_seed=42):
     rd = random.Random()
     rd.seed(hash_seed)
-
     namespace = uuid.NAMESPACE_URL
-    hash_val = uuid.uuid5(uuid.NAMESPACE_URL, name=smiles, int=rd.getrandbits(128))
+    hash_val = uuid.uuid5(uuid.NAMESPACE_URL, name=smiles)
     cropped_hash_val = str(hash_val)[:hash_crop]
 
     return cropped_hash_val
