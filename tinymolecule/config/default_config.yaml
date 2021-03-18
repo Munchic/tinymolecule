@@ -44,7 +44,8 @@ data_paths:
   ligands_dir: "ligands"  # */data/ligands/, for storing input small molecules
   targets_dir: "targets"  # */data/targets/, for storing PDBQT structures of protein targets
   out_dir: "out"  # */data/out/, for storing docked coordinates of small molecules
-
+  assays_meta_csv: "meta.csv"  # */data/meta.csv, for storing assays metadata
+  
   ligands_train_csv: "train.csv"  # */data/ligands/train.csv
   ligands_gen_csv: "gen.csv"  # */data/ligands/gen.csv
   ligands_train_dir: "train"  # */data/ligands/train/
@@ -57,6 +58,7 @@ data_paths:
   out_gen_dir: "gen"
   out_pdbqt_dir: "pdbqt"  # */data/out/<train or gen>/<TARGET_NAME>/pdbqt/
   out_logs_dir: "logs"  # */data/out/<train or gen>/<TARGET_NAME>/logs/
+  summary_csv: "summary.csv"  # */data/out/<train or gen>/<TARGET_NAME>/summary.csv
 
 
 # TINYMOLECULE PARAMETERS

@@ -28,3 +28,14 @@ def hash_smiles(smiles, hash_crop=8, hash_seed=42):
 def shell_command(command):
     FNULL = open(os.devnull, "w")
     subprocess.check_call(shlex.split(command), stdout=FNULL, stderr=subprocess.STDOUT)
+
+
+def get_smiles_from_id(logs_path, samples_path):
+    req_ids = pd.read_csv(logs_path)["uuid"].values  # requested IDs
+    samples = pd.read_csv(samples_path)
+
+    smi_corresp = samples[samples["uuid"].isin(req_ids)]  # corresponding SMILES codes
+    smi_corresp.drop_duplicates(subset="SMILES", inplace=True)
+    smi_corresp.reset_index(drop=True, inplace=True)
+
+    return smi_corresp
