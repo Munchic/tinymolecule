@@ -2,8 +2,9 @@ import os
 import uuid
 import shlex
 import subprocess
-
 import random
+
+import pandas as pd
 
 
 def change_file_ext(filename, ext=None):
@@ -39,3 +40,12 @@ def get_smiles_from_id(logs_path, samples_path):
     smi_corresp.reset_index(drop=True, inplace=True)
 
     return smi_corresp
+
+
+def get_mean_baff_df(logs, prefix=""):
+    all_baff = pd.concat([logs[f"affin_kcal_mol-1_{i}"] for i in range(1, 11)], axis=1)
+    mean_baff = all_baff.mean(axis=1) * (-1)
+    mean_baff.rename(f"{prefix}avg_affin_kcal_mol-1", inplace=True)
+    mean_baff_df = pd.concat([logs["uuid"], mean_baff], axis=1)
+
+    return mean_baff_df

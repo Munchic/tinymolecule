@@ -2,6 +2,7 @@ import os
 from copy import deepcopy
 from pathlib import Path
 from typing import Optional, Union, List, Tuple
+from functools import reduce
 
 import yaml
 import pandas as pd
@@ -9,6 +10,7 @@ import pandas as pd
 from moses.metrics.utils import get_mol, logP, weight, get_n_rings, mol_passes_filters
 
 from tinymolecule.utils.molecules import molecular_properties
+from tinymolecule.utils.helper_fn import get_mean_baff_df
 
 
 class TinyAnalyze:
@@ -153,8 +155,51 @@ class TinyAnalyze:
 
         return mol_props_and_baff_df
 
-    def prioritize(self, which_ligands: "gen"):
-        pass  # return a list with the ordering of the top molecules
+    def prioritize(self, which_ligands="gen"):
+        """
+        Returns a dataframe of small molecules prioritized using the objective function
+
+        | uuid | variants_mean | off_target_max | objective |
+        """
+
+        logs_variants = {}
+        for target in self.targets["variants"]:
+            target_name = target.lower()
+            cur_summary = pd.read_csv(self.out_gen_subdir / target_name / "summary.csv")
+            logs_variants[target_name] = get_mean_baff_df(
+                cur_summary, prefix=f"{target_name}_"
+            )
+
+        logs_off_targets = {}
+        for target in self.targets["off_targets"]:
+            target_name = target.lower()
+            cur_summary = pd.read_csv(self.out_gen_subdir / target_name / "summary.csv")
+            logs_off_targets[target_name] = get_mean_baff_df(
+                cur_summary, prefix=f"{target_name}_"
+            )
+
+        variants_merged = reduce(
+            lambda left, right: pd.merge(left, right, on="uuid"), logs_variants.values()
+        )
+        off_targets_merged = reduce(
+            lambda left, right: pd.merge(left, right, on="uuid"),
+            logs_off_targets.values(),
+        )
+
+        # the norms
+        variants_merged["variants_mean"] = variants_merged.mean(axis=1)
+        off_targets_merged["off_targets_max"] = off_targets_merged.max(axis=1)
+
+        cross_baff = pd.merge(off_targets_merged, variants_merged, on="uuid")
+        cross_baff["objective"] = (
+            cross_baff["variants_mean"] - cross_baff["off_targets_max"]
+        )
+        cross_baff.sort_values(by="objective", ascending=False, inplace=True)
+
+        self.priority_df = cross_baff[
+            ["uuid", "variants_mean", "off_targets_max", "objective"]
+        ]
+        print("molecules prioritized, you can access at TinyAnalyze.priority_df")
 
     def get_molecular_properties(self, molecules_uuid: list):
         """
