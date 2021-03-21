@@ -1,0 +1,86 @@
+---
+# PROTEIN TARGETS
+#
+targets:
+  off_targets:
+    CCR2:
+      pdbqt: "ccr2.pdbqt"
+      vina_config: "vina_config_ccr2.txt"
+    CCR1:
+      pdbqt: "ccr2.pdbqt"
+      vina_config: "vina_config_ccr1.txt"
+    CCR3:
+      pdbqt: "ccr2.pdbqt"
+      vina_config: "vina_config_ccr3.txt"
+    CCR9:
+      pdbqt: "ccr2.pdbqt"
+      vina_config: "vina_config_ccr9.txt"
+    CCR6:
+      pdbqt: "ccr2.pdbqt"
+      vina_config: "vina_config_ccr6.txt"
+
+  variants:
+    WT_CCR5:
+      pdbqt: "ccr5.pdbqt"
+      vina_config: "vina_config_ccr5.txt"
+    CCR5_Y3D:
+      pdbqt: "ccr5_y3d.pdbqt"
+      vina_config: "vina_config_ccr5_y3d.txt"
+    CCR5_G301E:
+      pdbqt: "ccr5_g301e.pdbqt"
+      vina_config: "vina_config_ccr5_g301e.txt"
+    CCR5_G202E:
+      pdbqt: "ccr5_g202e.pdbqt"
+      vina_config: "vina_config_ccr5_g202e.txt"
+    CCR5_I253F:
+      pdbqt: "ccr5_i253f.pdbqt"
+      vina_config: "vina_config_ccr5_i253f.txt"
+
+
+# DATA STORAGE PATHS
+#
+data_paths:
+  data_dir: "data"
+  ligands_dir: "ligands"  # */data/ligands/, for storing input small molecules
+  targets_dir: "targets"  # */data/targets/, for storing PDBQT structures of protein targets
+  out_dir: "out"  # */data/out/, for storing docked coordinates of small molecules
+  assays_meta_csv: "meta.csv"  # */data/meta.csv, for storing assays metadata
+  
+  ligands_train_csv: "train.csv"  # */data/ligands/train.csv
+  ligands_gen_csv: "gen.csv"  # */data/ligands/gen.csv
+  ligands_train_dir: "train"  # */data/ligands/train/
+  ligands_gen_dir: "gen"  # */data/ligands/gen/
+
+  targets_pdbqt_dir: "pdbqt"  # */data/targets/pdbqt/
+  targets_vina_config_dir: "vina_config"  # */data/targets/vina_config/
+
+  out_train_dir: "train"
+  out_gen_dir: "gen"
+  out_pdbqt_dir: "pdbqt"  # */data/out/<train or gen>/<TARGET_NAME>/pdbqt/
+  out_logs_dir: "logs"  # */data/out/<train or gen>/<TARGET_NAME>/logs/
+  summary_csv: "summary.csv"  # */data/out/<train or gen>/<TARGET_NAME>/summary.csv
+
+
+# TINYMOLECULE PARAMETERS
+#
+tiny_params:
+  uuid_crop: 8  # number of characters to crop UUID at
+  uuid_seed: 42  # seed for reproducible hashes
+
+
+# TRAINING DATA PROCESSING
+#
+train_data_params:
+  assay_type: "IC50"
+  standard_units: "nM"
+  smiles_type: "canonical_smiles"
+  
+  remove_duplicates: True
+  molecules_to_remove:
+    Maraviroc: "Cc1nnc(C(C)C)n1[C@H]1C[C@@H]2CC[C@H](C1)N2CC[C@H](NC(=O)C1CCC(F)(F)CC1)c1ccccc1"
+    INCB-9471: "CCO[C@@H]1Cc2cc(C(F)(F)F)ccc2[C@H]1N1CCN(C2(C)CCN(C(=O)c3c(C)ncnc3C)CC2)C[C@@H]1C"
+    Aplaviroc: "CCCCN1C(=O)[C@@H]([C@H](O)C2CCCCC2)NC(=O)C12CCN(Cc1ccc(Oc3ccc(C(=O)O)cc3)cc1)CC2"
+    Vicriviroc: "COC[C@@H](c1ccc(C(F)(F)F)cc1)N1CCN(C2(C)CCN(C(=O)c3c(C)ncnc3C)CC2)C[C@@H]1C"
+    AZD5672: "CCN(C(=O)Cc1ccc(S(C)(=O)=O)cc1)C1CCN(CC[C@@H](c2cc(F)cc(F)c2)C2CCN(S(C)(=O)=O)CC2)CC1"
+    PF-04634817: "CO[C@@H]1COCC[C@@H]1N[C@@H]1CC[C@@](C(=O)N2C[C@@H]3C[C@H]2CN3c2cc(C(F)(F)F)ncn2)(C(C)C)C1"
+    Cenicriviroc: "CCCCOCCOc1ccc(-c2ccc3c(c2)/C=C(/C(=O)Nc2ccc([S@@+]([O-])Cc4cncn4CCC)cc2)CCCN3CC(C)C)cc1"

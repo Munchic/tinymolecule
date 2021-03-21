@@ -74,17 +74,18 @@ def dock(
     """
 
     # prepare paths
-    out_path = pdb_out_path / "valid_sample_1e5_ccr2"  # "train"  # "valid_sample_1e5"
+    out_path = pdb_out_path  # "valid_sample_1e5_ccr2"  # "train"  # "valid_sample_1e5"  # TODO: automate path choice
     logs_path = out_path / "logs"
     os.makedirs(out_path, exist_ok=True)
     os.makedirs(logs_path, exist_ok=True)
 
-    # random subsampling
-    all_ligand_files = os.listdir(ligand_folder_path)
+    all_ligand_files = list(  # filter out molecules whose structure we already have
+        set(os.listdir(ligand_folder_path)) - set(os.listdir(out_path))
+    )
     if os.path.isfile(
         str(molecs_from_logs)
     ):  # if choose molecules from logs of another docking experiment
-        ligs_to_dock = pd.read_csv(molecs_from_logs)["base64_id"].values
+        ligs_to_dock = pd.read_csv(molecs_from_logs)["uuid"].values
         ligand_files = []
         for lig in all_ligand_files:
             if change_file_ext(lig) in ligs_to_dock:
@@ -148,61 +149,229 @@ def generate_logs_table(logs_path):
         log_ids.append(change_file_ext(logfile))
 
     logs_df = pd.DataFrame(logs_table[1:], columns=logs_table[0], dtype=float)
-    logs_df["base64_id"] = log_ids
+    logs_df["uuid"] = log_ids
     logs_df.to_csv(logs_path / LOGS_SUMMARY_FILE)  # save
 
     return logs_df
 
 
-# CCR5 docking on generated
+# # CCR5 docking on generated
 # dock(
 #     ligand_folder_path=Path(
-#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/valid_sample_1e5"
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/ccr5_valid_45e"
 #     ),
 #     config_path=Path(
 #         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config.txt"
 #     ),
-#     pdb_out_path=Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out"),
+#     pdb_out_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr5_valid_45e"
+#     ),
+#     subsample_perc=1,
 # )
 
 # generate_logs_table(
 #     Path(
-#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5/logs"
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr5_valid_45e/logs"
 #     )
 # )
 
-# CCR5 docking on train
+# # CCR5 docking on train
 # dock(
 #     ligand_folder_path=Path(
-#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/train"
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/ccr5_train"
 #     ),
 #     config_path=Path(
 #         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config.txt"
 #     ),
-#     pdb_out_path=Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out"),
-#     subsample_perc=0.05,
+#     pdb_out_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr5_train"
+#     ),
+#     subsample_perc=1,
 # )
 
 # generate_logs_table(
-#     Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/train/logs")
+#     Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr5_train/logs")
 # )
 
 # # CCR2 docking on generated
 # dock(
 #     ligand_folder_path=Path(
-#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/valid_sample_1e5"
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/ccr5_valid_45e"
 #     ),
 #     config_path=Path(
 #         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr2.txt"
 #     ),
-#     pdb_out_path=Path("/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out"),
-#     molecs_from_logs=Path(
-#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5/logs/summary.csv"
+#     pdb_out_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr2_valid_45e"
 #     ),
+#     subsample_perc=1,
 # )
 
 # generate_logs_table(
 #     Path(
-#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/valid_sample_1e5_ccr2/logs"
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr2_valid_45e/logs"
+#     )
+# )
+
+# # CCR5 Y3D docking on generated
+# dock(
+#     ligand_folder_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/ccr5_valid_45e"
+#     ),
+#     config_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr5_y3d.txt"
+#     ),
+#     pdb_out_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr5_y3d_valid_45e"
+#     ),
+#     subsample_perc=1,
+# )
+
+# generate_logs_table(
+#     Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr5_y3d_valid_45e/logs"
+#     )
+# )
+
+# # CCR5 G301E docking on generated
+# dock(
+#     ligand_folder_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/ccr5_valid_45e"
+#     ),
+#     config_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr5_g301e.txt"f
+#     ),
+#     pdb_out_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr5_g301e_valid_45e"
+#     ),
+#     subsample_perc=1,
+# )
+
+# generate_logs_table(
+#     Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr5_g301e_valid_45e/logs"
+#     )
+# )
+
+# # CCR1 docking on generated
+# dock(
+#     ligand_folder_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/ccr5_valid_45e"
+#     ),
+#     config_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr1.txt"
+#     ),
+#     pdb_out_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr1_valid_45e"
+#     ),
+#     subsample_perc=1,
+# )
+
+# generate_logs_table(
+#     Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr1_valid_45e/logs"
+#     )
+# )
+
+# # CCR3 docking on generated
+# dock(
+#     ligand_folder_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/ccr5_valid_45e"
+#     ),
+#     config_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr3.txt"
+#     ),
+#     pdb_out_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr3_valid_45e"
+#     ),
+#     subsample_perc=1,
+# )
+
+# generate_logs_table(
+#     Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr3_valid_45e/logs"
+#     )
+# )
+
+# ordering: CCR2, CCR5 Y3D, CCR5 G301E, CCR1, CCR3
+# ordering #2: CCR5 G202E, CCR5 I253F, CCR9, CCR6
+
+# # CCR5 G202E docking on generated
+# dock(
+#     ligand_folder_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/ccr5_valid_45e"
+#     ),
+#     config_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr5_g202e.txt"
+#     ),
+#     pdb_out_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr5_g202e_valid_45e"
+#     ),
+#     subsample_perc=1,
+# )
+
+# generate_logs_table(
+#     Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr5_g202e_valid_45e/logs"
+#     )
+# )
+
+# # CCR5 I253F docking on generated
+# dock(
+#     ligand_folder_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/ccr5_valid_45e"
+#     ),
+#     config_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr5_i253f.txt"
+#     ),
+#     pdb_out_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr5_i253f_valid_45e"
+#     ),
+#     subsample_perc=1,
+# )
+
+# generate_logs_table(
+#     Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr5_i253f_valid_45e/logs"
+#     )
+# )
+
+# # CCR9 docking on generated
+# dock(
+#     ligand_folder_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/ccr5_valid_45e"
+#     ),
+#     config_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr9.txt"
+#     ),
+#     pdb_out_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr9_valid_45e"
+#     ),
+#     subsample_perc=1,
+# )
+
+# generate_logs_table(
+#     Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr9_valid_45e/logs"
+#     )
+# )
+
+# # CCR6 docking on generated
+# dock(
+#     ligand_folder_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb/ccr5_valid_45e"
+#     ),
+#     config_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/vina_config_ccr6.txt"
+#     ),
+#     pdb_out_path=Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr6_valid_45e"
+#     ),
+#     subsample_perc=1,
+# )
+
+# generate_logs_table(
+#     Path(
+#         "/Users/Munchic/Developer/Capstone/tinymolecule/data/pdb_out/ccr6_valid_45e/logs"
 #     )
 # )

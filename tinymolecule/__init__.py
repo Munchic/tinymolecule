@@ -1,5 +1,3 @@
-from pathlib import Path
-
-from .models import *
-from .dataset import *
-from .train import *
+from .TinyTrain import TinyTrain
+from .TinyDock import TinyDock
+from .TinyAnalyze import TinyAnalyze
