@@ -1,0 +1,1 @@
+from .download_data import download_chembl_assays_metadata

@@ -218,3 +218,11 @@ class TinyAnalyze:
             props_dict[m_uuid] = props
 
         return props_dict
+
+    def get_smiles_from_uuid(self, uuid: str):
+        ligands_gen_df = pd.read_csv(self.ligands_gen_csv)
+        smiles = ligands_gen_df[ligands_gen_df["uuid"] == uuid]["SMILES"].reset_index(
+            drop=True
+        )
+
+        return smiles[0]
